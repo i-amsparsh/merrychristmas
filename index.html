@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz Natal!</title>
+    <style>
+        /* --- Configurações Gerais --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #0c0c0c;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        /* ================= MODO GRÁFICO ================= */
+        #graphical-mode-container {
+            position: relative;
+            display: none; /* Oculto por padrão */
+            flex-direction: column;
+            align-items: center;
+            width: 100%; 
+            height: 100%;
+            justify-content: center;
+        }
+
+        .snowflake {
+            position: absolute;
+            top: -20px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1em;
+            z-index: 1; 
+            pointer-events: none;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        }
+        
+        .term-snow {
+            color: #444 !important; 
+            font-family: 'Consolas', 'Courier New', monospace !important;
+            text-shadow: none !important;
+            z-index: 1 !important;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-20px) translateX(0px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) translateX(20px) rotate(360deg); opacity: 0.2; }
+        }
+
+        .christmas-tree {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            margin-bottom: 20px;
+            z-index: 10;
+            transform-origin: bottom center;
+            animation: treeSway 4s ease-in-out infinite;
+        }
+        @keyframes treeSway {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
+        }
+        .trunk { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 30px; height: 50px; background: #4a3728; border-radius: 4px; }
+        .layer { position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: solid transparent; border-right: solid transparent; border-bottom: solid #15803d; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3)); }
+        .layer-1 { bottom: 40px; border-left-width: 90px; border-right-width: 90px; border-bottom-width: 100px; z-index: 1; }
+        .layer-2 { bottom: 100px; border-left-width: 70px; border-right-width: 70px; border-bottom-width: 80px; z-index: 2; }
+        .layer-3 { bottom: 150px; border-left-width: 50px; border-right-width: 50px; border-bottom-width: 60px; z-index: 3; }
+        .star { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); font-size: 40px; color: #fbbf24; z-index: 4; animation: glow 1.5s infinite alternate; text-shadow: 0 0 15px #fbbf24; }
+        .lights-container { position: absolute; width: 100%; height: 100%; z-index: 5; pointer-events: none; }
+        .light { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: white; box-shadow: 0 0 10px 2px currentColor; animation: blink 1s infinite alternate; }
+        .l1 { top: 190px; left: 80px; color: #ff0000; animation-delay: 0.1s; } .l2 { top: 220px; left: 120px; color: #00ffff; animation-delay: 0.5s; } .l3 { top: 160px; left: 100px; color: #ffff00; animation-delay: 0.2s; } .l4 { top: 130px; left: 90px; color: #ff00ff; animation-delay: 0.7s; } .l5 { top: 130px; left: 110px; color: #00ff00; animation-delay: 0.3s; } .l6 { top: 100px; left: 100px; color: #ff0000; animation-delay: 0.6s; } .l7 { top: 240px; left: 60px; color: #ffffff; animation-delay: 0.4s; } .l8 { top: 240px; left: 140px; color: #ffaa00; animation-delay: 0.8s; } .l9 { top: 180px; left: 130px; color: #00ff00; animation-delay: 0.1s; } .l10 { top: 180px; left: 70px; color: #00ffff; animation-delay: 0.9s; }
+        @keyframes blink { 0% { opacity: 0.4; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }
+        @keyframes glow { from { text-shadow: 0 0 10px #fbbf24; transform: translateX(-50%) scale(1); } to { text-shadow: 0 0 25px #fbbf24; transform: translateX(-50%) scale(1.1); } }
+
+        .countdown { text-align: center; background: rgba(255, 255, 255, 0.1); padding: 20px 40px; border-radius: 16px; backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); transition: opacity 0.5s ease; z-index: 20; }
+        h1 { margin: 0 0 15px 0; font-size: 1.5rem; letter-spacing: 2px; text-transform: uppercase; color: #fbbf24; }
+        #timer { display: flex; gap: 20px; justify-content: center; }
+        .time-box { display: flex; flex-direction: column; align-items: center; }
+        .number { font-size: 2.5rem; font-weight: bold; font-variant-numeric: tabular-nums; }
+        .label { font-size: 0.8rem; text-transform: uppercase; color: #cbd5e1; margin-top: 5px; }
+        @media (max-width: 600px) { .number { font-size: 1.8rem; } #timer { gap: 10px; } .countdown { padding: 15px 20px; width: 90%; box-sizing: border-box; } }
+
+        /* ================= MODO TERMINAL ================= */
+        #terminal-mode-container {
+            display: flex; /* Visível por padrão */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background-color: #0c0c0c;
+            position: relative; 
+            overflow: hidden; 
+            z-index: 50;
+        }
+
+        #terminal-output {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 1.2rem;
+            line-height: 1.1;
+            white-space: pre; 
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .term-yellow { color: #f1c40f; text-shadow: 0 0 5px #f1c40f; }
+        .term-green { color: #006400; } 
+        .term-trunk { color: #A9A9A9; }
+        .term-msg { color: #d63384; font-weight: bold; margin-top: 20px; display: block;}
+    </style>
+</head>
+<body>
+    <audio id="bgMusic" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="graphical-mode-container">
+        <div class="christmas-tree">
+            <div class="star">★</div>
+            <div class="layer layer-3"></div>
+            <div class="layer layer-2"></div>
+            <div class="layer layer-1"></div>
+            <div class="trunk"></div>
+            <div class="lights-container">
+                <div class="light l1"></div><div class="light l2"></div><div class="light l3"></div>
+                <div class="light l4"></div><div class="light l5"></div><div class="light l6"></div>
+                <div class="light l7"></div><div class="light l8"></div><div class="light l9"></div>
+                <div class="light l10"></div>
+            </div>
+        </div>
+        <div class="countdown" id="countdownBox">
+            <h1>Contagem para o Natal</h1>
+            <div id="timer">
+                <div class="time-box"><span class="number" id="days">00</span><span class="label">Dias</span></div>
+                <div class="time-box"><span class="number" id="hours">00</span><span class="label">Horas</span></div>
+                <div class="time-box"><span class="number" id="minutes">00</span><span class="label">Min</span></div>
+                <div class="time-box"><span class="number" id="seconds">00</span><span class="label">Seg</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="terminal-mode-container">
+        <pre id="terminal-output"></pre>
+    </div>
+
+    <script>
+        // ============================================
+        // LÓGICA COMUM E GERAL
+        // ============================================
+        let currentMode = 'terminal'; // Padrão Terminal
+        let terminalRefreshRate = 500; // Padrão 500ms (pode ser alterado nas configs)
+
+        // --- Background ---
+        let colorCenter = "30, 41, 59"; 
+        let colorEdge = "15, 23, 42";
+        function updateBackground() {
+            if (currentMode === 'graphical') {
+                document.body.style.background = `radial-gradient(circle at center, rgb(${colorCenter}), rgb(${colorEdge}))`;
+            }
+        }
+
+        // --- Neve Unificada ---
+        let snowEnabled = true; 
+        let snowInterval;
+
+        function createSnowflake() {
+            if (!snowEnabled) return;
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            
+            const duration = Math.random() * 3 + 2; 
+            snowflake.style.left = Math.random() * 100 + 'vw';
+            snowflake.style.animation = `fall ${duration}s linear forwards`;
+
+            if (currentMode === 'graphical') {
+                snowflake.innerText = '❄';
+                const size = Math.random() * 10 + 10;
+                snowflake.style.fontSize = size + 'px';
+                document.getElementById('graphical-mode-container').appendChild(snowflake);
+            } else {
+                snowflake.innerText = '.'; 
+                snowflake.classList.add('term-snow'); 
+                snowflake.style.fontSize = '20px'; 
+                document.getElementById('terminal-mode-container').appendChild(snowflake);
+            }
+            setTimeout(() => { snowflake.remove(); }, duration * 1000);
+        }
+        snowInterval = setInterval(createSnowflake, 100);
+
+        // ============================================
+        // MODO GRÁFICO
+        // ============================================
+        function updateCountdown() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            let christmas = new Date(currentYear, 11, 25, 0, 0, 0); 
+            if (now.getTime() > christmas.getTime() + (24 * 60 * 60 * 1000)) {
+                christmas = new Date(currentYear + 1, 11, 25, 0, 0, 0);
+            }
+            const diff = christmas - now;
+            if (diff <= 0 && diff > -86400000) {
+                document.querySelector('h1').innerText = "É Natal!";
+                document.getElementById('timer').innerHTML = "<div class='number' style='color:#fbbf24'>Feliz Natal!</div>";
+                return;
+            }
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            document.getElementById('days').innerText = d < 10 ? '0' + d : d;
+            document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+            document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
+            document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
+        }
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // ============================================
+        // MODO TERMINAL (Lógica e Renderização)
+        // ============================================
+        const terminalOutput = document.getElementById('terminal-output');
+        const termColors = ['red', 'yellow', 'cyan', 'magenta', 'white', 'blue'];
+        const treeHeight = 20;
+        let terminalInterval = null;
+
+        function drawTerminalTree() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            let christmas = new Date(currentYear, 11, 25, 0, 0, 0); 
+            
+            if (now.getTime() > christmas.getTime() + 86400000) {
+                christmas.setFullYear(currentYear + 1);
+            }
+            const diff = christmas - now;
+            let mainMessageText = "";
+            let timerText = "";
+
+            if (diff > 0) {
+                mainMessageText = "[SYS_MSG]: CONTAGEM PARA O NATAL...";
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                timerText = `[SYS_TIMER]: ${(d<10?'0'+d:d)}d ${(h<10?'0'+h:h)}h ${(m<10?'0'+m:m)}m ${(s<10?'0'+s:s)}s`;
+            } else {
+                mainMessageText = "[SYS_MSG]: FELIZ NATAL!";
+                timerText = `[SYS_STATUS]: EVENT_STARTED_SUCCESSFULLY`;
+            }
+
+            let outputString = '<span class="term-yellow">★</span>\n';
+
+            for (let i = 2; i <= treeHeight; i++) {
+                let layerWidth = (i * 2) - 1;
+                let layerContent = "";
+                for (let j = 1; j <= layerWidth; j++) {
+                    if (Math.random() > 0.8) {
+                        const randomColor = termColors[Math.floor(Math.random() * termColors.length)];
+                        layerContent += `<span style="color:${randomColor}">o</span>`;
+                    } else {
+                        layerContent += `<span class="term-green">*</span>`;
+                    }
+                }
+                outputString += layerContent + "\n";
+            }
+
+            for (let t = 0; t < 2; t++) {
+                outputString += '<span class="term-trunk">|||</span>\n';
+            }
+
+            outputString += `\n<span style="color:#aaa; font-size: 0.8em; margin-top: 20px; display:block">${mainMessageText}</span>`;
+            outputString += `<span style="color:#aaa; font-size: 0.8em; margin-top: 5px; display:block">${timerText}</span>`;
+
+            terminalOutput.innerHTML = outputString;
+        }
+
+        // Função para gerenciar o loop do terminal
+        function startTerminalLoop() {
+            // Limpa o intervalo existente (se houver)
+            if (terminalInterval) {
+                clearInterval(terminalInterval);
+                terminalInterval = null;
+            }
+
+            // Se o modo for terminal, inicia um novo com a velocidade atual
+            if (currentMode === 'terminal') {
+                drawTerminalTree(); // Desenha imediatamente
+                terminalInterval = setInterval(drawTerminalTree, terminalRefreshRate);
+            }
+        }
+
+        // ============================================
+        // WALLPAPER ENGINE - LISTENER
+        // ============================================
+        window.wallpaperPropertyListener = {
+            applyUserProperties: function(properties) {
+                
+                // MODO
+                if (properties.tree_mode) {
+                    currentMode = properties.tree_mode.value;
+                    const graphContainer = document.getElementById('graphical-mode-container');
+                    const termContainer = document.getElementById('terminal-mode-container');
+
+                    if (currentMode === 'terminal') {
+                        graphContainer.style.display = 'none';
+                        termContainer.style.display = 'flex';
+                        document.body.style.background = '#0c0c0c';
+                    } else {
+                        termContainer.style.display = 'none';
+                        graphContainer.style.display = 'flex';
+                        updateBackground();
+                    }
+                    startTerminalLoop(); // Reinicia/Para o loop com base no modo
+                }
+
+                // VELOCIDADE DO PISCAR (NOVO)
+                if (properties.terminal_speed) {
+                    terminalRefreshRate = properties.terminal_speed.value;
+                    // Se estiver no modo terminal, atualiza o loop em tempo real
+                    if (currentMode === 'terminal') {
+                        startTerminalLoop();
+                    }
+                }
+
+                // OUTROS
+                if (properties.bg_center) {
+                    let c = properties.bg_center.value.split(' ');
+                    colorCenter = `${Math.ceil(c[0]*255)}, ${Math.ceil(c[1]*255)}, ${Math.ceil(c[2]*255)}`;
+                    updateBackground();
+                }
+                if (properties.bg_edge) {
+                    let c = properties.bg_edge.value.split(' ');
+                    colorEdge = `${Math.ceil(c[0]*255)}, ${Math.ceil(c[1]*255)}, ${Math.ceil(c[2]*255)}`;
+                    updateBackground();
+                }
+                if (properties.snow_toggle) snowEnabled = properties.snow_toggle.value;
+                if (properties.timer_toggle) {
+                    document.getElementById("countdownBox").style.opacity = properties.timer_toggle.value ? "1" : "0";
+                }
+                if (properties.audio_volume) {
+                    const audio = document.getElementById('bgMusic');
+                    const volume = properties.audio_volume.value;
+                    if (volume > 0 && audio.paused) audio.play().catch(e => console.log(e));
+                    audio.volume = volume / 100;
+                }
+            }
+        };
+
+        // INICIALIZAÇÃO (Começa o loop imediatamente se o padrão for Terminal)
+        startTerminalLoop();
+
+    </script>
+</body>
+</html>
