@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="notranslate">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feliz Natal!</title>
     <style>
@@ -24,7 +25,7 @@
         /* ================= MODO GRÁFICO ================= */
         #graphical-mode-container {
             position: relative;
-            display: none; /* Oculto por padrão */
+            display: none; 
             flex-direction: column;
             align-items: center;
             width: 100%; 
@@ -90,7 +91,7 @@
 
         /* ================= MODO TERMINAL ================= */
         #terminal-mode-container {
-            display: flex; /* Visível por padrão */
+            display: flex; 
             flex-direction: column;
             align-items: center;
             justify-content: center;
@@ -115,10 +116,9 @@
         .term-yellow { color: #f1c40f; text-shadow: 0 0 5px #f1c40f; }
         .term-green { color: #006400; } 
         .term-trunk { color: #A9A9A9; }
-        .term-msg { color: #d63384; font-weight: bold; margin-top: 20px; display: block;}
     </style>
 </head>
-<body>
+<body class="notranslate">
     <audio id="bgMusic" loop>
         <source src="music.mp3" type="audio/mpeg">
     </audio>
@@ -154,12 +154,11 @@
 
     <script>
         // ============================================
-        // LÓGICA COMUM E GERAL
+        // LÓGICA GERAL
         // ============================================
-        let currentMode = 'terminal'; // Padrão Terminal
-        let terminalRefreshRate = 500; // Padrão 500ms (pode ser alterado nas configs)
+        let currentMode = 'terminal'; 
+        let terminalRefreshRate = 500; 
 
-        // --- Background ---
         let colorCenter = "30, 41, 59"; 
         let colorEdge = "15, 23, 42";
         function updateBackground() {
@@ -168,23 +167,18 @@
             }
         }
 
-        // --- Neve Unificada ---
         let snowEnabled = true; 
-        let snowInterval;
-
         function createSnowflake() {
             if (!snowEnabled) return;
             const snowflake = document.createElement('div');
             snowflake.classList.add('snowflake');
-            
             const duration = Math.random() * 3 + 2; 
             snowflake.style.left = Math.random() * 100 + 'vw';
             snowflake.style.animation = `fall ${duration}s linear forwards`;
 
             if (currentMode === 'graphical') {
                 snowflake.innerText = '❄';
-                const size = Math.random() * 10 + 10;
-                snowflake.style.fontSize = size + 'px';
+                snowflake.style.fontSize = (Math.random() * 10 + 10) + 'px';
                 document.getElementById('graphical-mode-container').appendChild(snowflake);
             } else {
                 snowflake.innerText = '.'; 
@@ -194,7 +188,7 @@
             }
             setTimeout(() => { snowflake.remove(); }, duration * 1000);
         }
-        snowInterval = setInterval(createSnowflake, 100);
+        setInterval(createSnowflake, 100);
 
         // ============================================
         // MODO GRÁFICO
@@ -203,8 +197,8 @@
             const now = new Date();
             const currentYear = now.getFullYear();
             let christmas = new Date(currentYear, 11, 25, 0, 0, 0); 
-            if (now.getTime() > christmas.getTime() + (24 * 60 * 60 * 1000)) {
-                christmas = new Date(currentYear + 1, 11, 25, 0, 0, 0);
+            if (now.getTime() > christmas.getTime() + 86400000) {
+                christmas.setFullYear(currentYear + 1);
             }
             const diff = christmas - now;
             if (diff <= 0 && diff > -86400000) {
@@ -212,125 +206,81 @@
                 document.getElementById('timer').innerHTML = "<div class='number' style='color:#fbbf24'>Feliz Natal!</div>";
                 return;
             }
-            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((diff % (1000 * 60)) / 1000);
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
             document.getElementById('days').innerText = d < 10 ? '0' + d : d;
             document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
             document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
             document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
         }
         setInterval(updateCountdown, 1000);
-        updateCountdown();
 
         // ============================================
-        // MODO TERMINAL (Lógica e Renderização)
+        // MODO TERMINAL
         // ============================================
         const terminalOutput = document.getElementById('terminal-output');
         const termColors = ['red', 'yellow', 'cyan', 'magenta', 'white', 'blue'];
-        const treeHeight = 20;
         let terminalInterval = null;
 
         function drawTerminalTree() {
             const now = new Date();
-            const currentYear = now.getFullYear();
-            let christmas = new Date(currentYear, 11, 25, 0, 0, 0); 
+            let christmas = new Date(now.getFullYear(), 11, 25, 0, 0, 0);
+            if (now.getTime() > christmas.getTime() + 86400000) christmas.setFullYear(now.getFullYear() + 1);
             
-            if (now.getTime() > christmas.getTime() + 86400000) {
-                christmas.setFullYear(currentYear + 1);
-            }
             const diff = christmas - now;
-            let mainMessageText = "";
-            let timerText = "";
-
+            let msg = diff > 0 ? "[SYS_MSG]: CONTAGEM PARA O NATAL..." : "[SYS_MSG]: FELIZ NATAL!";
+            let timer = "";
             if (diff > 0) {
-                mainMessageText = "[SYS_MSG]: CONTAGEM PARA O NATAL...";
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((diff % (1000 * 60)) / 1000);
-                timerText = `[SYS_TIMER]: ${(d<10?'0'+d:d)}d ${(h<10?'0'+h:h)}h ${(m<10?'0'+m:m)}m ${(s<10?'0'+s:s)}s`;
+                const d = Math.floor(diff / 86400000);
+                const h = Math.floor((diff % 86400000) / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                const s = Math.floor((diff % 60000) / 1000);
+                timer = `[SYS_TIMER]: ${d}d ${h}h ${m}m ${s}s`;
             } else {
-                mainMessageText = "[SYS_MSG]: FELIZ NATAL!";
-                timerText = `[SYS_STATUS]: EVENT_STARTED_SUCCESSFULLY`;
+                timer = "[SYS_STATUS]: EVENT_STARTED_SUCCESSFULLY";
             }
 
-            let outputString = '<span class="term-yellow">★</span>\n';
-
-            for (let i = 2; i <= treeHeight; i++) {
-                let layerWidth = (i * 2) - 1;
-                let layerContent = "";
-                for (let j = 1; j <= layerWidth; j++) {
+            let output = '<span class="term-yellow">★</span>\n';
+            for (let i = 2; i <= 20; i++) {
+                let content = "";
+                for (let j = 1; j <= (i * 2 - 1); j++) {
                     if (Math.random() > 0.8) {
-                        const randomColor = termColors[Math.floor(Math.random() * termColors.length)];
-                        layerContent += `<span style="color:${randomColor}">o</span>`;
+                        content += `<span style="color:${termColors[Math.floor(Math.random() * termColors.length)]}">o</span>`;
                     } else {
-                        layerContent += `<span class="term-green">*</span>`;
+                        content += `<span class="term-green">*</span>`;
                     }
                 }
-                outputString += layerContent + "\n";
+                output += content + "\n";
             }
-
-            for (let t = 0; t < 2; t++) {
-                outputString += '<span class="term-trunk">|||</span>\n';
-            }
-
-            outputString += `\n<span style="color:#aaa; font-size: 0.8em; margin-top: 20px; display:block">${mainMessageText}</span>`;
-            outputString += `<span style="color:#aaa; font-size: 0.8em; margin-top: 5px; display:block">${timerText}</span>`;
-
-            terminalOutput.innerHTML = outputString;
+            output += '<span class="term-trunk">|||</span>\n<span class="term-trunk">|||</span>\n';
+            output += `\n<span style="color:#aaa; font-size: 0.8em; display:block">${msg}</span>`;
+            output += `<span style="color:#aaa; font-size: 0.8em; display:block">${timer}</span>`;
+            terminalOutput.innerHTML = output;
         }
 
-        // Função para gerenciar o loop do terminal
         function startTerminalLoop() {
-            // Limpa o intervalo existente (se houver)
-            if (terminalInterval) {
-                clearInterval(terminalInterval);
-                terminalInterval = null;
-            }
-
-            // Se o modo for terminal, inicia um novo com a velocidade atual
+            if (terminalInterval) clearInterval(terminalInterval);
             if (currentMode === 'terminal') {
-                drawTerminalTree(); // Desenha imediatamente
+                drawTerminalTree();
                 terminalInterval = setInterval(drawTerminalTree, terminalRefreshRate);
             }
         }
 
-        // ============================================
-        // WALLPAPER ENGINE - LISTENER
-        // ============================================
         window.wallpaperPropertyListener = {
             applyUserProperties: function(properties) {
-                
-                // MODO
                 if (properties.tree_mode) {
                     currentMode = properties.tree_mode.value;
-                    const graphContainer = document.getElementById('graphical-mode-container');
-                    const termContainer = document.getElementById('terminal-mode-container');
-
-                    if (currentMode === 'terminal') {
-                        graphContainer.style.display = 'none';
-                        termContainer.style.display = 'flex';
-                        document.body.style.background = '#0c0c0c';
-                    } else {
-                        termContainer.style.display = 'none';
-                        graphContainer.style.display = 'flex';
-                        updateBackground();
-                    }
-                    startTerminalLoop(); // Reinicia/Para o loop com base no modo
+                    document.getElementById('graphical-mode-container').style.display = currentMode === 'terminal' ? 'none' : 'flex';
+                    document.getElementById('terminal-mode-container').style.display = currentMode === 'terminal' ? 'flex' : 'none';
+                    if (currentMode === 'terminal') document.body.style.background = '#0c0c0c'; else updateBackground();
+                    startTerminalLoop();
                 }
-
-                // VELOCIDADE DO PISCAR (NOVO)
                 if (properties.terminal_speed) {
                     terminalRefreshRate = properties.terminal_speed.value;
-                    // Se estiver no modo terminal, atualiza o loop em tempo real
-                    if (currentMode === 'terminal') {
-                        startTerminalLoop();
-                    }
+                    if (currentMode === 'terminal') startTerminalLoop();
                 }
-
-                // OUTROS
                 if (properties.bg_center) {
                     let c = properties.bg_center.value.split(' ');
                     colorCenter = `${Math.ceil(c[0]*255)}, ${Math.ceil(c[1]*255)}, ${Math.ceil(c[2]*255)}`;
@@ -342,21 +292,16 @@
                     updateBackground();
                 }
                 if (properties.snow_toggle) snowEnabled = properties.snow_toggle.value;
-                if (properties.timer_toggle) {
-                    document.getElementById("countdownBox").style.opacity = properties.timer_toggle.value ? "1" : "0";
-                }
+                if (properties.timer_toggle) document.getElementById("countdownBox").style.opacity = properties.timer_toggle.value ? "1" : "0";
                 if (properties.audio_volume) {
                     const audio = document.getElementById('bgMusic');
-                    const volume = properties.audio_volume.value;
-                    if (volume > 0 && audio.paused) audio.play().catch(e => console.log(e));
-                    audio.volume = volume / 100;
+                    audio.volume = properties.audio_volume.value / 100;
+                    if (audio.volume > 0 && audio.paused) audio.play().catch(e => console.log(e));
                 }
             }
         };
 
-        // INICIALIZAÇÃO (Começa o loop imediatamente se o padrão for Terminal)
         startTerminalLoop();
-
     </script>
 </body>
 </html>
